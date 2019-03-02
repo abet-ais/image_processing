@@ -216,3 +216,6 @@ include_directories(
 add_executable(image_reading src/image_reading.cpp)
 target_link_libraries(image_reading ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 
+add_executable(yamazaki_test src/yamazaki_test.cpp)
+target_link_libraries(yamazaki_test ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
+
