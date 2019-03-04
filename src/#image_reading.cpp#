@@ -37,7 +37,6 @@
 void imageCb(const sensor_msgs::ImageConstPtr& rgb_image);
 
 
-
 void imageCb(const sensor_msgs::ImageConstPtr& rgb_image){  //callback関数
 
   /*--- カメラのデータをopencvで扱える型に変更 ---*/
@@ -123,7 +122,6 @@ void imageCb(const sensor_msgs::ImageConstPtr& rgb_image){  //callback関数
   Syy_dif_2.clear();
   sources.clear();
   
-
   /*----- 点の描画 -----*/
   float x = 0;
   for(int y=0; y<b_w_color.cols; ++y){
@@ -136,7 +134,6 @@ void imageCb(const sensor_msgs::ImageConstPtr& rgb_image){  //callback関数
   cv::line(color_gray,cv::Point(0,300),cv::Point(WINDOW_WIDTH,300),cv::Scalar(100,100,100),4);
   cv::circle(color_gray,cv::Point(WINDOW_WIDTH/2,300),10,cv::Scalar(100,100,100),4);
 
-
   /*----- 表示 -----*/
   cv::imshow("color_raw",color_raw);
   // cv::imshow("color_gray",color_gray);
@@ -144,6 +141,7 @@ void imageCb(const sensor_msgs::ImageConstPtr& rgb_image){  //callback関数
   cv::imshow("canny_image",canny_image);
   cv::waitKey(1);
 }
+
 
 
 int main(int argc, char** argv){
