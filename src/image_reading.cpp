@@ -29,13 +29,13 @@
 #include <numeric>
 
 
+
 //define
 #define WINDOW_WIDTH  640
 #define WINDOW_HEIGHT 480
 
 //prototype declaration
 void imageCb(const sensor_msgs::ImageConstPtr& rgb_image);
-
 
 
 void imageCb(const sensor_msgs::ImageConstPtr& rgb_image){  //callback関数
@@ -99,8 +99,6 @@ void imageCb(const sensor_msgs::ImageConstPtr& rgb_image){  //callback関数
     y_dif.push_back(y_co[i]-y_ave);
     Syy_dif_2.push_back( std::pow(y_co[i]-y_ave,2) );
   }
-
-  std::cout <<  x_ave << "  " << y_ave << std::endl;
   
   for(int i=0; i<x_dif.size(); i++){
     Sxy_dif.push_back(x_dif[i]*y_dif[i]);
@@ -123,7 +121,6 @@ void imageCb(const sensor_msgs::ImageConstPtr& rgb_image){  //callback関数
   Syy_dif_2.clear();
   sources.clear();
   
-
   /*----- 点の描画 -----*/
   float x = 0;
   for(int y=0; y<b_w_color.cols; ++y){
@@ -131,19 +128,37 @@ void imageCb(const sensor_msgs::ImageConstPtr& rgb_image){  //callback関数
     cv::circle(color_raw,cv::Point((int)x,y),4,cv::Scalar(0));
   }
 
-  /*----- 白線とのズレをわかりやすくするために軸を描画 -----*/
-  cv::line(color_gray,cv::Point(WINDOW_WIDTH/2,0),cv::Point(WINDOW_WIDTH/2,WINDOW_HEIGHT),cv::Scalar(100,100,100),4);
-  cv::line(color_gray,cv::Point(0,300),cv::Point(WINDOW_WIDTH,300),cv::Scalar(100,100,100),4);
-  cv::circle(color_gray,cv::Point(WINDOW_WIDTH/2,300),10,cv::Scalar(100,100,100),4);
+  /*----- 白線とのズレをわかりやすくするために点で軸を描画 -----*/
+  cv::Point origin;
+  origin.x = WINDOW_WIDTH/2;
+  origin.y = 300;
+  cv::line(color_raw,cv::Point(WINDOW_WIDTH/2,0),cv::Point(WINDOW_WIDTH/2,WINDOW_HEIGHT),cv::Scalar(100,100,100),4);
+  cv::line(color_raw,cv::Point(0,origin.y),cv::Point(WINDOW_WIDTH,origin.y),cv::Scalar(100,100,100),4);
+  cv::circle(color_raw,origin,10,cv::Scalar(100,100,100),4);
+
+  cv::circle(color_raw,cv::Point(alpha + beta*origin.y,origin.y),5,cv::Scalar(0,0,255),-1);
 
 
+  /*----- 中心ズレと回転角度 -----*/
+  float x_ = alpha - (alpha+beta*origin.y);  //y=0の時の 
+  float y_ = (float)origin.y;
+  float theta = (180/M_PI)*atan(x_/y_);
+  float dif_origin_x = (alpha+beta*origin.y) - origin.x;
+  std::cout << "dif_origin_x: " << dif_origin_x << "  " << "theta: " << theta << std::endl;
+
+  cv::putText(color_raw,"dif(x)",cv::Point(10,50),cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0,0,0), 2);
+  cv::putText(color_raw,std::to_string(dif_origin_x),cv::Point(100,50),cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0,0,0), 2);
+  cv::putText(color_raw,"theta",cv::Point(10,100),cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0,0,0), 2);
+  cv::putText(color_raw,std::to_string(theta),cv::Point(100,100),cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0,0,0), 2);
+  
   /*----- 表示 -----*/
   cv::imshow("color_raw",color_raw);
   // cv::imshow("color_gray",color_gray);
   // cv::imshow("color_b_w",b_w_color);
-  cv::imshow("canny_image",canny_image);
+  // cv::imshow("canny_image",canny_image);
   cv::waitKey(1);
 }
+
 
 
 int main(int argc, char** argv){
@@ -161,8 +176,8 @@ int main(int argc, char** argv){
   // cv::resizeWindow("color_gray", WINDOW_WIDTH, WINDOW_HEIGHT);
   // cv::namedWindow("color_b_w", CV_WINDOW_NORMAL);
   // cv::resizeWindow("color_b_w", WINDOW_WIDTH, WINDOW_HEIGHT);
-  cv::namedWindow("canny_image", CV_WINDOW_NORMAL);
-  cv::resizeWindow("canny_image", WINDOW_WIDTH, WINDOW_HEIGHT);
+  // cv::namedWindow("canny_image", CV_WINDOW_NORMAL);
+  // cv::resizeWindow("canny_image", WINDOW_WIDTH, WINDOW_HEIGHT);
   
   ros::spin();
   return 0;
