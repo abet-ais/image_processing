@@ -219,3 +219,14 @@ target_link_libraries(image_reading ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 add_executable(yamazaki_test src/yamazaki_test.cpp)
 target_link_libraries(yamazaki_test ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 
+add_executable(houghlines1 src/houghlines1.cpp)
+target_link_libraries(houghlines1 ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
+
+add_executable(edg src/edg.cpp)
+target_link_libraries(edg ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
+
+add_executable(2_values_edg src/2_values_edg.cpp)
+target_link_libraries(2_values_edg ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
+
+add_executable(2_values_ex src/2_values_ex.cpp)
+target_link_libraries(2_values_ex ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})

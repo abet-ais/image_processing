@@ -35,26 +35,24 @@ void imageCb(const sensor_msgs::ImageConstPtr& rgb_image){
     return;
   }
 
-  std::vector<cv::Mat> sources;
-  
+
   cv::Mat color_raw  = cv_rgb->image;
   cv::Mat color_gray;
   cv::Mat b_w_color;
-  sources.push_back(color_raw);
 
   cvtColor(color_raw, color_gray,CV_RGB2GRAY);                 //grayスケール変換
   threshold(color_gray,b_w_color,160,255,cv::THRESH_BINARY);   //2値化
 
   int x = WINDOW_WIDTH / 2;
   int y = WINDOW_HEIGHT / 2;
-  
+
   int B = color_raw.at<cv::Vec3b>(y,x)[0];
   int G = color_raw.at<cv::Vec3b>(y,x)[1];
   int R = color_raw.at<cv::Vec3b>(y,x)[2];
-  
+
   std::cout << "R: " << R << "  " << "G: " << G << "  " << "B: " << B << std::endl;
 
-  
+
   cv::imshow("color_raw",color_raw);
   cv::imshow("color_gray",color_gray);
   cv::imshow("color_b_w",b_w_color);
@@ -70,15 +68,15 @@ int main(int argc, char** argv){
   image_transport::Subscriber sub_rgb_image;
 
   sub_rgb_image = it.subscribe("/grobal/image_raw",1,&imageCb);
-  
+
   cv::namedWindow("color_raw", CV_WINDOW_NORMAL);            //ウィンドウに名前をつける
   cv::resizeWindow("color_raw", WINDOW_WIDTH, WINDOW_HEIGHT);//ウィンドウのサイズを変更
   cv::namedWindow("color_gray", CV_WINDOW_NORMAL);            //ウィンドウに名前をつける
   cv::resizeWindow("color_gray", WINDOW_WIDTH, WINDOW_HEIGHT);//ウィンドウのサイズを変更
   cv::namedWindow("color_b_w", CV_WINDOW_NORMAL);            //ウィンドウに名前をつける
   cv::resizeWindow("color_b_w", WINDOW_WIDTH, WINDOW_HEIGHT);//ウィンドウのサイズを変更
-  
-  
+
+
   ros::spin();
   return 0;
 

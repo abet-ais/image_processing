@@ -87,15 +87,61 @@ void imageCb(const sensor_msgs::ImageConstPtr& rgb_image){
   cvtColor(color_raw, color_gray,CV_RGB2GRAY);                 //grayスケール変換
   threshold(color_gray,b_w_color,160,255,cv::THRESH_BINARY);   //2値化
 
-  int x = WINDOW_WIDTH / 2;
-  int y = WINDOW_HEIGHT / 2;
+  //int x = 0;
+  //int y WINDOW_HEIGHT / 2;
 
-  int B = color_raw.at<cv::Vec3b>(y,x)[0];
-  int G = color_raw.at<cv::Vec3b>(y,x)[1];
-  int R = color_raw.at<cv::Vec3b>(y,x)[2];
+  int probe_x[640];
+  int sort_x = 0;
+  int x_0_l = 0;
+  int x_0_r = 0;
 
-  std::cout << "R: " << R << "  " << "G: " << G << "  " << "B: " << B << std::endl;
+  probe_x[0] = 0;
+  //std::cout << "A: " << A << std::endl;
+for(int i = 1;i>640;i++){
 
+  probe_x[i] = b_w_color.at<cv::Vec3b>(WINDOW_HEIGHT,i)[0];
+
+  sort_x = probe_x[i]-probe_x[i-1];
+if ( sort_x > 255) {
+  x_0_l = i;
+}//if B>255
+if ( sort_x < 255) {
+  x_0_r= i;
+  }//if B<255
+}//for0
+int probe_x_1[640];
+int sort_x_1 = 0;
+int x_1_l = 0;
+int x_1_r = 0;
+
+probe_x_1[0] = 0;
+//std::cout << "A: " << A << std::endl;
+for(int i = 1;i>640;i++){
+
+probe_x_1[i] = b_w_color.at<cv::Vec3b>(WINDOW_HEIGHT,i)[0];
+
+sort_x_1 = probe_x_1[i]-probe_x_1[i-1];
+if ( sort_x_1 > 250) {
+x_1_l = i;
+}//if B>255
+if ( sort_x_1 < 250) {
+x_1_r= i;
+}//if B<255
+}//for1
+int x_0 = WINDOW_WIDTH / 4;
+int y_0 = WINDOW_WIDTH;
+int y_1 = 0;
+
+float center_line_x_0 = 0.0;
+float center_line_x_1 = 0.0;
+
+  center_line_x_0 = (x_0_l + x_0_r)/2.0;
+  center_line_x_1 = (x_1_l + x_1_r)/2.0;
+
+  cv::line( color_raw, cv::Point(x_0,y_0),cv::Point(x_0,y_1), cv::Scalar(255,0,0), 3, 8 );
+  cv::line( color_raw, cv::Point(x_1_l,y_0),cv::Point(x_1_r,y_1), cv::Scalar(0,255,0), 3, 8 );
+  cv::line( color_raw, cv::Point(x_0_l,y_0),cv::Point(x_0_r,y_1), cv::Scalar(0,255,0), 3, 8 );
+  cv::line( color_raw, cv::Point(center_line_x_0,y_0),cv::Point(center_line_x_1,y_1), cv::Scalar(0,0,255), 3, 8 );
 
   cv::imshow("color_raw",color_raw);
   cv::imshow("color_gray",color_gray);

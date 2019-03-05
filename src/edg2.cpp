@@ -1,5 +1,5 @@
 /**********************************************************************
-   File    yamazaki_test.cpp
+   File    edg2.cpp
    Author  Takahiro Yamazaki
    Environment    ROS_kinetic
    OS       Ubuntu 16.04 LTS
@@ -40,7 +40,6 @@
 /**********************************************************************
    Globle
 **********************************************************************/
-
 /**********************************************************************
    Proto_type_Declare functions
 **********************************************************************/
@@ -63,7 +62,8 @@ int main(int argc, char** argv){
   cv::resizeWindow("color_gray", WINDOW_WIDTH, WINDOW_HEIGHT);//ウィンドウのサイズを変更
   cv::namedWindow("color_b_w", CV_WINDOW_NORMAL);            //ウィンドウに名前をつける
   cv::resizeWindow("color_b_w", WINDOW_WIDTH, WINDOW_HEIGHT);//ウィンドウのサイズを変更
-
+  cv::namedWindow("temp_dst", CV_WINDOW_NORMAL);            //ウィンドウに名前をつける
+  cv::resizeWindow("temp_dst", WINDOW_WIDTH, WINDOW_HEIGHT);//ウィンドウのサイズを変更
 
   ros::spin();
   return 0;
@@ -73,6 +73,7 @@ int main(int argc, char** argv){
    Functions
 **********************************************************************/
 void imageCb(const sensor_msgs::ImageConstPtr& rgb_image){
+
   cv_bridge::CvImagePtr cv_rgb;
   try{
     cv_rgb = cv_bridge::toCvCopy(rgb_image, sensor_msgs::image_encodings::BGR8);
@@ -80,25 +81,21 @@ void imageCb(const sensor_msgs::ImageConstPtr& rgb_image){
     ROS_ERROR("cv_bridge exception: %s", e.what());
     return;
   }
+
   cv::Mat color_raw  = cv_rgb->image;
   cv::Mat color_gray;
   cv::Mat b_w_color;
+  cv::Mat temp_dst;
+
 
   cvtColor(color_raw, color_gray,CV_RGB2GRAY);                 //grayスケール変換
   threshold(color_gray,b_w_color,160,255,cv::THRESH_BINARY);   //2値化
-
-  int x = WINDOW_WIDTH / 2;
-  int y = WINDOW_HEIGHT / 2;
-
-  int B = color_raw.at<cv::Vec3b>(y,x)[0];
-  int G = color_raw.at<cv::Vec3b>(y,x)[1];
-  int R = color_raw.at<cv::Vec3b>(y,x)[2];
-
-  std::cout << "R: " << R << "  " << "G: " << G << "  " << "B: " << B << std::endl;
-
+  cv::Canny(b_w_color, temp_dst, 50, 200, 3);
 
   cv::imshow("color_raw",color_raw);
   cv::imshow("color_gray",color_gray);
   cv::imshow("color_b_w",b_w_color);
+  cv::imshow("temp_dst",temp_dst);
+
   cv::waitKey(1);
 }
