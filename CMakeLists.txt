@@ -230,3 +230,15 @@ target_link_libraries(2_values_edg ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 
 add_executable(2_values_ex src/2_values_ex.cpp)
 target_link_libraries(2_values_ex ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
+
+add_executable(red_detect src/red_detect.cpp)
+target_link_libraries(red_detect ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
+
+add_executable(yellow_detect src/yellow_detect.cpp)
+target_link_libraries(yellow_detect ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
+
+add_executable(MR2_image_processing src/MR2_image_processing.cpp)
+target_link_libraries(MR2_image_processing ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
+
+add_executable(r_y_detect src/r_y_detect.cpp)
+target_link_libraries(r_y_detect ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
