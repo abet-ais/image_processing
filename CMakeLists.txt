@@ -242,3 +242,7 @@ target_link_libraries(MR2_image_processing ${catkin_LIBRARIES} ${OpenCV_LIBRARIE
 
 add_executable(r_y_detect src/r_y_detect.cpp)
 target_link_libraries(r_y_detect ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
+
+add_executable(MR2_image_processing_abe src/MR2_image_processing_abe.cpp)
+target_link_libraries(MR2_image_processing_abe ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
+

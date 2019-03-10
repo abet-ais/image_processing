@@ -1,4 +1,4 @@
-////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////
 //
 //作成日：2019/3/5
 //作成者：阿部
@@ -144,7 +144,7 @@ void imageCb(const sensor_msgs::ImageConstPtr& rgb_image){  //callback関数
   float y_ = (float)origin.y;
   float theta = (180/M_PI)*atan(x_/y_);
   float dif_origin_x = (alpha+beta*origin.y) - origin.x;
-  std::cout << "dif_origin_x: " << dif_origin_x << "  " << "theta: " << theta << std::endl;
+  // std::cout << "dif_origin_x: " << dif_origin_x << "  " << "theta: " << theta << std::endl;
 
   cv::putText(color_raw,"dif(x)",cv::Point(10,50),cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0,0,0), 2);
   cv::putText(color_raw,std::to_string(dif_origin_x),cv::Point(100,50),cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0,0,0), 2);
@@ -154,7 +154,7 @@ void imageCb(const sensor_msgs::ImageConstPtr& rgb_image){  //callback関数
   /*----- 表示 -----*/
   cv::imshow("color_raw",color_raw);
   // cv::imshow("color_gray",color_gray);
-  // cv::imshow("color_b_w",b_w_color);
+  cv::imshow("color_b_w",b_w_color);
   // cv::imshow("canny_image",canny_image);
   cv::waitKey(1);
 }
@@ -174,8 +174,8 @@ int main(int argc, char** argv){
   cv::resizeWindow("color_raw", WINDOW_WIDTH, WINDOW_HEIGHT);
   // cv::namedWindow("color_gray", CV_WINDOW_NORMAL);
   // cv::resizeWindow("color_gray", WINDOW_WIDTH, WINDOW_HEIGHT);
-  // cv::namedWindow("color_b_w", CV_WINDOW_NORMAL);
-  // cv::resizeWindow("color_b_w", WINDOW_WIDTH, WINDOW_HEIGHT);
+  cv::namedWindow("color_b_w", CV_WINDOW_NORMAL);
+  cv::resizeWindow("color_b_w", WINDOW_WIDTH, WINDOW_HEIGHT);
   // cv::namedWindow("canny_image", CV_WINDOW_NORMAL);
   // cv::resizeWindow("canny_image", WINDOW_WIDTH, WINDOW_HEIGHT);
 
