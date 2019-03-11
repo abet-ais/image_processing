@@ -246,3 +246,6 @@ target_link_libraries(r_y_detect ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 add_executable(MR2_image_processing_abe src/MR2_image_processing_abe.cpp)
 target_link_libraries(MR2_image_processing_abe ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 
+add_executable(yel_red_mouse_touch src/yel_red_mouse_touch.cpp)
+target_link_libraries(yel_red_mouse_touch ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
+

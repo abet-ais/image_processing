@@ -48,6 +48,15 @@
 #define XTION_HEIGHT -0.473    //checker_boardからxtion原点までの高さ距離(外部パラメータ)
 #define XTION_ROLL_RAD 0.411   //checker_boardからxtionのroll[rad](外部パラメータ)
 
+#define RED_H_MAX 180  //色相 赤約170~180
+#define RED_H_MIN 170
+#define YEL_H_MAX 30   //色相 黃約30~20
+#define YEL_H_MIN 20
+#define S_MAX 255      //彩度
+#define S_MIN 50
+#define V_MAX 255      //明度
+#define V_MIN 100
+
 
 /**********************************************************************
    Globle
@@ -56,7 +65,7 @@ cv::Mat color_raw;
 cv::Mat depth_raw;
 cv::Mat display_color;
 cv::Mat display_depth;
-
+cv::Mat hsv_image;
 
 /**********************************************************************
    Proto_type_Declare functions
@@ -97,6 +106,16 @@ int main(int argc, char** argv){
   // cv::resizeWindow("canny_image", WINDOW_WIDTH, WINDOW_HEIGHT);
   cv::namedWindow("display_color", CV_WINDOW_NORMAL);
   cv::resizeWindow("display_color", WINDOW_WIDTH, WINDOW_HEIGHT);
+  // cv::namedWindow("hsv_color", CV_WINDOW_NORMAL);
+  // cv::resizeWindow("hsv_color", WINDOW_WIDTH, WINDOW_HEIGHT);
+  // cv::namedWindow("mask_y", CV_WINDOW_NORMAL);
+  // cv::resizeWindow("mask_y", WINDOW_WIDTH, WINDOW_HEIGHT);
+  // cv::namedWindow("mask_r", CV_WINDOW_NORMAL);
+  // cv::resizeWindow("mask_r", WINDOW_WIDTH, WINDOW_HEIGHT);
+  cv::namedWindow("median_r", CV_WINDOW_NORMAL);
+  cv::resizeWindow("median_r", WINDOW_WIDTH, WINDOW_HEIGHT);
+  cv::namedWindow("median_y", CV_WINDOW_NORMAL);
+  cv::resizeWindow("median_y", WINDOW_WIDTH, WINDOW_HEIGHT);
 
   ros::spin();
   return 0;
@@ -139,51 +158,59 @@ void red_yellow_detection(const cv::Mat color_raw_ ,const cv::Mat depth_raw_){ /
   std::vector<float> y_yellow;
   std::vector<float> x_red;
   std::vector<float> y_red;
-  // bool is_start = 0;
-  int blue_channel  = 0;
-  int green_channel = 1;
-  int red_channel   = 2;
-  int blue_threshold_yellow = 100;
-  int green_threshold_yellow = 170;
-  int red_threshold_yellow = 170;
-  int blue_threshold_red = 100;
-  int green_threshold_red = 100;
-  int red_threshold_red = 170;
   float yellow_depth = 0.0;   //黄色の座標の距離データ格納
   int y_max = 0;              //yが最大の時ものを格納
   int x_ymax= 0;              //yが最大の時のx座標を格納(xの最大ではない)
   float yellow_board_distance; //xtionから黄色の板までの距離
+  cv::Mat output_hsv_y;
+  cv::Mat output_hsv_r;
+  cv::Mat median_y,median_r;
+  cv::Mat mask_y;
+  cv::Mat mask_r;
 
-  for(int y=0; y<color_raw_.rows; ++y){
-    for(int x=0; x<color_raw_.cols; ++x){
-      for(int c = 0; c < color_raw_.channels(); ++c){
-	int chanel_count = y*color_raw_.step+x*color_raw_.elemSize();
-	if( (color_raw_.data[chanel_count + red_channel] > red_threshold_yellow)
-	    && (color_raw_.data[chanel_count + green_channel] > green_threshold_yellow)
-	    && (color_raw_.data[chanel_count + blue_channel] < blue_threshold_yellow) ){
-	  // x_yellow.push_back(x);
+  /*--- hsv 変換 ---*/
+  cvtColor(color_raw_,hsv_image,CV_BGR2HSV);
+  cv::Scalar s_y_max = cv::Scalar(YEL_H_MAX,S_MAX,V_MAX);
+  cv::Scalar s_y_min = cv::Scalar(YEL_H_MIN,S_MIN,V_MIN);
+  cv::Scalar s_r_max = cv::Scalar(RED_H_MAX,S_MAX,V_MAX);
+  cv::Scalar s_r_min = cv::Scalar(RED_H_MIN,S_MIN,V_MIN);
+  inRange(hsv_image,s_y_min,s_y_max,mask_y);
+  inRange(hsv_image,s_r_min,s_r_max,mask_r);
+  
+  // color_raw_.copyTo(output_hsv_y,mask_y);  //yellow mask処理
+  // color_raw_.copyTo(output_hsv_r,mask_r);  //red mask処理
+
+  medianBlur(mask_y,median_y,5); //平滑化
+  medianBlur(mask_r,median_r,5); //平滑化
+  
+  // cv::imshow("mask_y",mask_y);
+  // cv::imshow("mask_r",mask_r);
+  cv::imshow("median_y",median_y);
+  cv::imshow("median_r",median_r);
+  
+  for(int y=0; y<median_y.rows; ++y){
+    for(int x=0; x<median_y.cols; ++x){
+	int chanel_count = y*median_y.step+x*median_y.elemSize();
+	if( (median_y.data[chanel_count] == 255)){
+	  x_yellow.push_back(x);
 	  y_yellow.push_back(y);
 	  if(y_max < y){
 	    y_max = y;
 	    x_ymax= x;
 	  }
 	}//if yellow detect
-	if( (color_raw_.data[chanel_count+ red_channel] > red_threshold_red)
-	    && (color_raw_.data[chanel_count + green_channel] < green_threshold_red) ){
+	if( (median_r.data[chanel_count] == 255) ){
 	  x_red.push_back(x);
 	  y_red.push_back(y);
 	}//if red detect
-      }//for channels
     }// for cols
   }//for rows
   
   if( !y_yellow.empty() ){
-    // float y_min_yellow = *std::max_element(y_yellow.begin(), y_yellow.end());
     yellow_depth = depth_raw_.at<cv::Vec3f>(y_max,x_ymax)[0]/1000;  //[mm]で出力のため[m]に変換
     cv::line( display_color,cv::Point(0,y_max),cv::Point(WINDOW_WIDTH,y_max), cv::Scalar(0,100,100), 3, 8 );
     cv::circle( display_color,cv::Point(x_ymax,y_max),5,cv::Scalar(0,100,100),-1);
   }
-  //cv::circle(display_color,cv::Point(x_ave,y_ave),10,cv::Scalar(0,0,255),-1);
   if( !y_red.empty() ){
     float y_min_red = *std::max_element(y_red.begin(), y_red.end());
     cv::line(display_color,cv::Point(0,y_min_red),cv::Point(WINDOW_WIDTH,y_min_red), cv::Scalar(0,0,255), 3, 8 );
@@ -210,6 +237,7 @@ void white_line_detection(const cv::Mat color_raw_){ //白線検出
   /*----- 画像処理 -----*/
   cvtColor(color_raw_, color_gray,CV_RGB2GRAY);                 //grayスケール変換
   threshold(color_gray,b_w_color,230,255,cv::THRESH_BINARY);   //2値化
+  medianBlur(b_w_color,b_w_color,5); //平滑化
   Canny(b_w_color, canny_image,1,0);
 
   /*----- 最小二乗法による白線線形回帰 -----*/
@@ -302,6 +330,7 @@ void white_line_detection(const cv::Mat color_raw_){ //白線検出
   cv::putText(display_color,std::to_string(theta),cv::Point(100,100),cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(255), 2);
 
   cv::imshow("display_color",display_color);
+  // cv::imshow("hsv_color",hsv_image);
   // cv::imshow("color_gray",color_gray);
   // cv::imshow("color_b_w",b_w_color);
   // cv::imshow("canny_image",canny_image);
